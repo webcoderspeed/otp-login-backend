@@ -4,7 +4,9 @@ const baseURL = '/api/v1';
 
 const routes = (app) => {
 	// app health check
-	app.get(baseURL, (req, res, next) => res.status(301).json({ app_version: '1.0.0' }));
+	app.get('/', (req, res, next) =>
+		res.status(301).send('Hey this is my API running 🥳'),
+	);
 
 	// auth routes
 	app.use(`${baseURL}/auth`, authRoutes);
