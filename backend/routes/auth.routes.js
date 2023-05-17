@@ -8,4 +8,10 @@ router
 	.route('/generate-otp')
 	.post(authValidators.validateGenerateOTPRequest, authControllers.generateOTP);
 
+router.post(
+	'/otp-login',
+	authValidators.validateOTPLoginRequest,
+	authControllers.otpLogin,
+);
+
 export default router;
