@@ -22,6 +22,9 @@ dependencies:
   mongoose:
     specifier: ^7.1.1
     version: 7.1.1
+  nodemailer:
+    specifier: ^6.9.2
+    version: 6.9.2
 
 devDependencies:
   morgan:
@@ -648,6 +651,11 @@ packages:
   /negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /nodemailer@6.9.2:
+    resolution: {integrity: sha512-4+TYaa/e1nIxQfyw/WzNPYTEZ5OvHIDEnmjs4LPmIfccPQN+2CYKmGHjWixn/chzD3bmUTu5FMfpltizMxqzdg==}
+    engines: {node: '>=6.0.0'}
     dev: false
 
   /nodemon@2.0.22:

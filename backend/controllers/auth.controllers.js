@@ -1,5 +1,8 @@
 import User from '../models/user.model.js';
 import asyncHandler from 'express-async-handler';
+import sendMail from '../utils/sendMail.js';
+import * as otpTemplates from '../templates/otp.template.js';
+import { checkIsUserBlockedFromLogin } from '../utils/shared.utils.js';
 
 /**
  * @desc   
@@ -22,26 +25,19 @@ export const generateOTP = asyncHandler(async (req, res, next) => {
 			const otp = await user.generateOTP();
 			await user.save();
 
+			await sendMail({
+				to: email,
+				subject: 'One-Time Password (OTP) for Account Verification',
+				html: otpTemplates.getOTPTemplate({ otp, validity: 5 }),
+			});
+
 			return res.status(201).json({
 				message: 'Please do check your mail, we have mailed you OTP for login',
-				otp,
 			});
 		}
 
 		// Check if the user's account is blocked [The login can be reattempted only after an hour]
-		if (
-			userExists?.attemptBlockTime &&
-			userExists?.attemptBlockTime > Date.now()
-		) {
-			const remainingTime = userExists?.attemptBlockTime - Date.now();
-			const secondsRemaining = Math.ceil(remainingTime / 1000);
-			const minutesRemaining = Math.floor(secondsRemaining / 60);
-			const seconds = secondsRemaining % 60;
-			res.status(403);
-			throw new Error(
-				`Account is blocked for ${userExists?.email}. Please try again later after ${minutesRemaining}min ${seconds}s`,
-			);
-		}
+		checkIsUserBlockedFromLogin({ user: userExists, response: res });
 
 		const ONE_MIN_DELAY = 60000; // Cooldown time between OTP generation requests in milliseconds -
 		if (
@@ -60,9 +56,14 @@ export const generateOTP = asyncHandler(async (req, res, next) => {
 
 		const otp = await userExists.generateOTP();
 
+		await sendMail({
+			to: email,
+			subject: 'One-Time Password (OTP) for Account Verification',
+			html: otpTemplates.getOTPTemplate({ otp, validity: 5 }),
+		});
+
 		res.status(201).json({
 			message: 'Please do check your mail, we have mailed you OTP for login',
-			otp,
 		});
 	} catch (error) {
 		next(error);
@@ -94,19 +95,7 @@ export const otpLogin = asyncHandler(async (req, res, next) => {
 		}
 
 		// Check if the user's account is blocked [The login can be reattempted only after an hour]
-		if (
-			userExists?.attemptBlockTime &&
-			userExists?.attemptBlockTime > Date.now()
-		) {
-			const remainingTime = userExists?.attemptBlockTime - Date.now();
-			const secondsRemaining = Math.ceil(remainingTime / 1000);
-			const minutesRemaining = Math.floor(secondsRemaining / 60);
-			const seconds = secondsRemaining % 60;
-			res.status(403);
-			throw new Error(
-				`Account is blocked for ${userExists?.email}. Please try again later after ${minutesRemaining}min ${seconds}s`,
-			);
-		}
+		checkIsUserBlockedFromLogin({ user: userExists, response: res });
 
 		const FIVE_MIN = 300000;
 		// Check if the OTP has expired [ - OTP is valid for 5 minutes only. Not after that.]

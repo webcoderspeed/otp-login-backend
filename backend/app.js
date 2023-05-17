@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import morgan from 'morgan';
+import morgan from 'morgan';``
 import chalk from 'chalk';
 import connectDB from './config/db.js';
 import { PORT } from './constants/index.js';
@@ -24,7 +24,6 @@ app.listen(PORT, async () => {
 	);
 
 	await connectDB();
-
 
 	routes(app);
 
