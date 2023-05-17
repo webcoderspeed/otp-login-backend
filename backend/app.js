@@ -1,9 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import chalk from 'chalk'
+import chalk from 'chalk';
 import connectDB from './config/db.js';
 import { PORT } from './constants/index.js';
+import { errorHandler, notFound } from './middlewares/error.middlewares.js';
+import routes from './routes/index.js';
 
 const app = express();
 
@@ -22,6 +24,12 @@ app.listen(PORT, async () => {
 	);
 
 	await connectDB();
+
+
+	routes(app);
+
+	app.use(notFound);
+	app.use(errorHandler);
 });
 
 // terminal close

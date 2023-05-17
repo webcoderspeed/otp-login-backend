@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, JWT_TOKEN_EXPIRY } from '../constants';
+import { JWT_SECRET, JWT_TOKEN_EXPIRY } from '../constants/index.js';
 
 const userSchema = new Schema(
 	{
@@ -10,17 +10,14 @@ const userSchema = new Schema(
 			trim: true,
 			unique: true,
 		},
-		otp: {
-			type: Number,
-			required: true,
-		},
+		otp: Number,
 		numberOfLoginAttempt: {
 			type: Number,
 			default: 0,
 			required: true,
 		},
-		timeOfLoginAttempt: Date,
-		otpExpiry: Date,
+		lastOtpTime: Date,
+		attemptBlockTime: Date,
 	},
 	{
 		timestamps: true,
@@ -29,18 +26,12 @@ const userSchema = new Schema(
 userSchema.methods.generateOTP = async function () {
 	const user = this;
 
-	const digits = '0123456789';
-	let otp = '';
+	const otp = Math.floor(100000 + Math.random() * 900000);
 
-	for (var i = 0; i < 6; i++) {
-		var randomIndex = Math.floor(Math.random() * digits.length);
-		otp += digits[randomIndex];
-	}
-
-	// setting up otp and otpExpiry
-	const ONE_HOUR = 60 * 60 * 1000;
 	user.otp = otp;
-	user.otpExpiry = new Date(Date.now() + ONE_HOUR);
+	user.lastOtpTime = new Date();
+
+	await user.save();
 
 	return otp;
 };
